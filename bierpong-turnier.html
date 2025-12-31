@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jährliches Saalbach Bierpongturnier</title>
+  <style>
+    :root { --bg:#0b0f14; --card:#121925; --muted:#98a2b3; --text:#e6edf3; --line:#223044; --accent:#7dd3fc; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:linear-gradient(180deg,#070a0f, #0b0f14); color:var(--text); }
+    header { padding:24px 16px 10px; max-width:1100px; margin:0 auto; }
+    h1 { margin:0 0 6px; font-size:28px; letter-spacing:.2px; }
+    p.sub { margin:0; color:var(--muted); }
+    main { max-width:1100px; margin:0 auto; padding:16px; display:grid; gap:16px; }
+    .grid2 { display:grid; gap:16px; grid-template-columns: 1fr; }
+    @media (min-width: 900px){ .grid2{ grid-template-columns: 1fr 1fr; } }
+    .card { background:rgba(18,25,37,.9); border:1px solid var(--line); border-radius:18px; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+    .card h2 { margin:0 0 12px; font-size:18px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .muted { color:var(--muted); }
+    input[type="text"], input[type="number"] {
+      background:#0b1220; border:1px solid var(--line); color:var(--text);
+      border-radius:12px; padding:10px 12px; outline:none; width:100%;
+    }
+    input[type="number"] { width:90px; }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(125,211,252,.12); }
+    button {
+      background:#0b1220; border:1px solid var(--line); color:var(--text);
+      border-radius:12px; padding:10px 12px; cursor:pointer;
+    }
+    button:hover { border-color:var(--accent); }
+    table { width:100%; border-collapse:collapse; overflow:hidden; border-radius:14px; }
+    th, td { padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+    th { text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+    tr:last-child td { border-bottom:none; }
+    .tag { display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--line); color:var(--muted); }
+    .match { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .team { min-width: 160px; }
+    .vs { color:var(--muted); }
+    .pill { padding:2px 8px; border-radius:999px; border:1px solid var(--line); font-size:12px; color:var(--muted); }
+    .section-note { margin-top:8px; font-size:13px; color:var(--muted); line-height:1.35; }
+    .right { text-align:right; }
+    .small { font-size:12px; color:var(--muted); }
+    footer { max-width:1100px; margin:0 auto; padding:0 16px 24px; color:var(--muted); }
+    .danger { border-color:#fb7185 !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Jährliches Saalbach Bierpongturnier</h1>
+    <p class="sub">Teamnamen & Ergebnisse eintragen – Tabellen & KO-Runde werden automatisch berechnet (Speicherung im Browser).</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="row" style="justify-content:space-between;">
+        <div>
+          <h2>Teams</h2>
+          <div class="small">Gruppe A: Teams 1–4 • Gruppe B: Teams 5–8</div>
+        </div>
+        <div class="row">
+          <button id="btnReset" title="Setzt alle Eingaben zurück (Teams & Ergebnisse)">Alles zurücksetzen</button>
+          <span class="tag">Auto-Save</span>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:12px;">
+        <div>
+          <div class="row" style="margin-bottom:10px;"><span class="pill">Gruppe A</span></div>
+          <div class="row">
+            <label class="team">Team 1<br><input id="team1" type="text" placeholder="z.B. Bierbären"></label>
+            <label class="team">Team 2<br><input id="team2" type="text" placeholder="z.B. Pong-Piraten"></label>
+            <label class="team">Team 3<br><input id="team3" type="text" placeholder="z.B. Becher-Bosses"></label>
+            <label class="team">Team 4<br><input id="team4" type="text" placeholder="z.B. Saalbach Legends"></label>
+          </div>
+        </div>
+        <div>
+          <div class="row" style="margin-bottom:10px;"><span class="pill">Gruppe B</span></div>
+          <div class="row">
+            <label class="team">Team 5<br><input id="team5" type="text" placeholder="z.B. Hopfenhelden"></label>
+            <label class="team">Team 6<br><input id="team6" type="text" placeholder="z.B. Becherbande"></label>
+            <label class="team">Team 7<br><input id="team7" type="text" placeholder="z.B. Schaumkronen"></label>
+            <label class="team">Team 8<br><input id="team8" type="text" placeholder="z.B. Pongonauten"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-note">
+        Tipp: Du kannst Teamnamen später ändern – die Spielpläne passen sich automatisch an.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Gruppenphase – Spielplan & Ergebnisse (12 Spiele)</h2>
+      <div class="section-note">Zwei Spiele laufen parallel: Tisch 1 & Tisch 2. Trage pro Spiel die Punkte (z.B. Treffer / Cups) ein.</div>
+
+      <table style="margin-top:12px;">
+        <thead>
+          <tr>
+            <th style="width:70px;">Runde</th>
+            <th>Tisch 1</th>
+            <th class="right">Ergebnis</th>
+            <th>Tisch 2</th>
+            <th class="right">Ergebnis</th>
+          </tr>
+        </thead>
+        <tbody id="groupMatches"></tbody>
+      </table>
+    </section>
+
+    <div class="grid2">
+      <section class="card">
+        <h2>Gruppe A – Tabelle</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:48px;">#</th>
+              <th>Team</th>
+              <th class="right">Sp</th>
+              <th class="right">S</th>
+              <th class="right">N</th>
+              <th class="right">P</th>
+              <th class="right">Diff</th>
+              <th class="right">Für</th>
+              <th class="right">Geg</th>
+            </tr>
+          </thead>
+          <tbody id="tableA"></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>Gruppe B – Tabelle</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:48px;">#</th>
+              <th>Team</th>
+              <th class="right">Sp</th>
+              <th class="right">S</th>
+              <th class="right">N</th>
+              <th class="right">P</th>
+              <th class="right">Diff</th>
+              <th class="right">Für</th>
+              <th class="right">Geg</th>
+            </tr>
+          </thead>
+          <tbody id="tableB"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Finalrunde – 4 Teams (K.-o.-System)</h2>
+      <div class="section-note">
+        Halbfinale wird automatisch aus der Gruppenplatzierung gesetzt:
+        <br>HF1: 1. Platz Gruppe A vs 2. Platz Gruppe B • HF2: 1. Platz Gruppe B vs 2. Platz Gruppe A
+      </div>
+
+      <table style="margin-top:12px;">
+        <thead>
+          <tr>
+            <th style="width:140px;">Phase</th>
+            <th>Tisch 1</th>
+            <th class="right">Ergebnis</th>
+            <th>Tisch 2</th>
+            <th class="right">Ergebnis</th>
+          </tr>
+        </thead>
+        <tbody id="finalMatches"></tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Platzierungsspiele (Plätze 5–8)</h2>
+      <div class="section-note">
+        Wird automatisch gesetzt:
+        <br>Platz 7: 4A vs 4B • Platz 5: 3A vs 3B
+      </div>
+
+      <table style="margin-top:12px;">
+        <thead>
+          <tr>
+            <th style="width:140px;">Phase</th>
+            <th>Tisch 1</th>
+            <th class="right">Ergebnis</th>
+            <th>Tisch 2</th>
+            <th class="right">Ergebnis</th>
+          </tr>
+        </thead>
+        <tbody id="placementMatches"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <div>Hinweis: Punktevergabe in der Tabelle: <b>Sieg = 2 Punkte</b>, Niederlage = 0. Tiebreaker: Punkte → Diff → Für → Name.</div>
+  </footer>
+
+<script>
+(function(){
+  // ---------- Config ----------
+  const TEAM_IDS = [1,2,3,4,5,6,7,8];
+
+  // Gruppenphase Plan (Runde, Tisch1 (a,b), Tisch2 (a,b))
+  const GROUP_PLAN = [
+    { round: 1, t1:[1,2], t2:[5,6] },
+    { round: 2, t1:[3,4], t2:[7,8] },
+    { round: 3, t1:[1,3], t2:[5,7] },
+    { round: 4, t1:[2,4], t2:[6,8] },
+    { round: 5, t1:[1,4], t2:[5,8] },
+    { round: 6, t1:[2,3], t2:[6,7] },
+  ];
+
+  const LS_KEY = "saalbach_bierpong_turnier_v1";
+
+  // ---------- State ----------
+  const state = {
+    teams: Object.fromEntries(TEAM_IDS.map(i => [i, `Team ${i}`])),
+    groupScores: {},     // key: g_r{round}_t{1|2} => {a,b}
+    finalsScores: {},    // key: f_hf1, f_hf2, f_final
+    placementScores: {}, // key: p_7, p_5
+  };
+
+  // ---------- Helpers ----------
+  function el(id){ return document.getElementById(id); }
+  function safeInt(v){
+    if (v === "" || v === null || v === undefined) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  function scoreKeyGroup(round, table){ return `g_r${round}_t${table}`; }
+
+  function save(){
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  }
+  function load(){
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return;
+    try{
+      const obj = JSON.parse(raw);
+      if(obj && typeof obj === "object"){
+        Object.assign(state, obj);
+      }
+    }catch(e){}
+  }
+
+  function teamName(id){
+    return (state.teams && state.teams[id]) ? state.teams[id] : `Team ${id}`;
+  }
+
+  function renderGroupMatches(){
+    const tbody = el("groupMatches");
+    tbody.innerHTML = "";
+    for(const row of GROUP_PLAN){
+      const tr = document.createElement("tr");
+
+      // Round
+      const tdR = document.createElement("td");
+      tdR.textContent = row.round;
+      tr.appendChild(tdR);
+
+      // Table 1 match
+      const [a1,b1] = row.t1;
+      const tdM1 = document.createElement("td");
+      tdM1.innerHTML = `<div class="match"><span class="team"><b>${teamName(a1)}</b></span><span class="vs">vs</span><span class="team"><b>${teamName(b1)}</b></span></div>`;
+      tr.appendChild(tdM1);
+
+      const tdS1 = document.createElement("td");
+      tdS1.className = "right";
+      tdS1.appendChild(scoreInputs(scoreKeyGroup(row.round,1), a1, b1, "groupScores"));
+      tr.appendChild(tdS1);
+
+      // Table 2 match
+      const [a2,b2] = row.t2;
+      const tdM2 = document.createElement("td");
+      tdM2.innerHTML = `<div class="match"><span class="team"><b>${teamName(a2)}</b></span><span class="vs">vs</span><span class="team"><b>${teamName(b2)}</b></span></div>`;
+      tr.appendChild(tdM2);
+
+      const tdS2 = document.createElement("td");
+      tdS2.className = "right";
+      tdS2.appendChild(scoreInputs(scoreKeyGroup(row.round,2), a2, b2, "groupScores"));
+      tr.appendChild(tdS2);
+
+      tbody.appendChild(tr);
+    }
+  }
+
+  function scoreInputs(key, aId, bId, bucket){
+    const wrap = document.createElement("div");
+    wrap.className = "match";
+    const a = document.createElement("input");
+    a.type = "number"; a.min = "0"; a.step = "1";
+    const b = document.createElement("input");
+    b.type = "number"; b.min = "0"; b.step = "1";
+    a.setAttribute("aria-label", `Punkte ${teamName(aId)}`);
+    b.setAttribute("aria-label", `Punkte ${teamName(bId)}`);
+
+    const val = (state[bucket] && state[bucket][key]) ? state[bucket][key] : {a:null,b:null};
+    a.value = (val.a ?? "");
+    b.value = (val.b ?? "");
+
+    const onChange = () => {
+      const av = safeInt(a.value);
+      const bv = safeInt(b.value);
+
+      // optional: if only one side filled, mark as warning
+      a.classList.toggle("danger", (av === null) !== (bv === null));
+      b.classList.toggle("danger", (av === null) !== (bv === null));
+
+      state[bucket][key] = { a: av, b: bv, aId, bId };
+      save();
+      recomputeAll();
+    };
+
+    a.addEventListener("input", onChange);
+    b.addEventListener("input", onChange);
+
+    wrap.appendChild(a);
+    wrap.insertAdjacentHTML("beforeend", `<span class="muted">:</span>`);
+    wrap.appendChild(b);
+    return wrap;
+  }
+
+  function computeGroupTable(group){
+    // group: "A" or "B"
+    const ids = (group === "A") ? [1,2,3,4] : [5,6,7,8];
+    const stats = Object.fromEntries(ids.map(id => [id, {
+      id, name: teamName(id),
+      played:0, wins:0, losses:0, pts:0, for:0, against:0, diff:0
+    }]));
+
+    // iterate group matches only
+    for(const row of GROUP_PLAN){
+      const matches = [row.t1, row.t2];
+      for(let i=0;i<2;i++){
+        const [aId,bId] = matches[i];
+        if(!ids.includes(aId) || !ids.includes(bId)) continue;
+
+        const key = scoreKeyGroup(row.round, i+1);
+        const s = state.groupScores[key];
+        if(!s || s.a === null || s.b === null) continue;
+
+        const a = stats[aId], b = stats[bId];
+        a.played++; b.played++;
+        a.for += s.a; a.against += s.b;
+        b.for += s.b; b.against += s.a;
+
+        if(s.a > s.b){
+          a.wins++; b.losses++;
+          a.pts += 2;
+        }else if(s.b > s.a){
+          b.wins++; a.losses++;
+          b.pts += 2;
+        }else{
+          // Unentschieden selten bei Bierpong; optional 1/1
+          a.pts += 1; b.pts += 1;
+        }
+      }
+    }
+    for(const id of ids){
+      stats[id].diff = stats[id].for - stats[id].against;
+      stats[id].name = teamName(id);
+    }
+
+    // sort
+    const sorted = ids
+      .map(id => stats[id])
+      .sort((x,y) =>
+        (y.pts - x.pts) ||
+        (y.diff - x.diff) ||
+        (y.for - x.for) ||
+        (x.name.localeCompare(y.name, "de"))
+      );
+
+    return sorted;
+  }
+
+  function renderTable(group){
+    const sorted = computeGroupTable(group);
+    const tbody = el(group === "A" ? "tableA" : "tableB");
+    tbody.innerHTML = "";
+    sorted.forEach((t, idx) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${idx+1}</td>
+        <td><b>${t.name}</b></td>
+        <td class="right">${t.played}</td>
+        <td class="right">${t.wins}</td>
+        <td class="right">${t.losses}</td>
+        <td class="right">${t.pts}</td>
+        <td class="right">${t.diff}</td>
+        <td class="right">${t.for}</td>
+        <td class="right">${t.against}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+    return sorted;
+  }
+
+  function renderFinalsAndPlacements(rankingA, rankingB){
+    // derive seeds
+    const A1 = rankingA[0]?.id ?? 1;
+    const A2 = rankingA[1]?.id ?? 2;
+    const A3 = rankingA[2]?.id ?? 3;
+    const A4 = rankingA[3]?.id ?? 4;
+
+    const B1 = rankingB[0]?.id ?? 5;
+    const B2 = rankingB[1]?.id ?? 6;
+    const B3 = rankingB[2]?.id ?? 7;
+    const B4 = rankingB[3]?.id ?? 8;
+
+    // semifinals
+    const hf1 = { key:"f_hf1", label:"Halbfinale 1", aId:A1, bId:B2, table:"Tisch 1" };
+    const hf2 = { key:"f_hf2", label:"Halbfinale 2", aId:B1, bId:A2, table:"Tisch 2" };
+
+    // winners for final
+    const w1 = winnerFrom("finalsScores","f_hf1", hf1.aId, hf1.bId);
+    const w2 = winnerFrom("finalsScores","f_hf2", hf2.aId, hf2.bId);
+
+    const final = { key:"f_final", label:"Finale", aId:w1 ?? hf1.aId, bId:w2 ?? hf2.aId, table:"Tisch 1" };
+
+    // placements
+    const p7 = { key:"p_7", label:"Spiel um Platz 7", aId:A4, bId:B4, table:"Tisch 1" };
+    const p5 = { key:"p_5", label:"Spiel um Platz 5", aId:A3, bId:B3, table:"Tisch 2" };
+
+    // render finals table
+    const ft = el("finalMatches");
+    ft.innerHTML = "";
+    ft.appendChild(finalRow(hf1.label, hf1.aId, hf1.bId, hf1.key, "finalsScores", true, "")); // Tisch 2 empty in row -> we do 2-column rows via table layout below
+    ft.appendChild(finalRow(hf2.label, hf2.aId, hf2.bId, hf2.key, "finalsScores", false, "")); // show in "Tisch 2" column
+    ft.appendChild(finalRow(final.label, final.aId, final.bId, final.key, "finalsScores", true, "(Sieger HF1 vs Sieger HF2)"));
+
+    // render placements
+    const pt = el("placementMatches");
+    pt.innerHTML = "";
+    pt.appendChild(placeRow(p7.label, p7.aId, p7.bId, p7.key, "placementScores", true));
+    pt.appendChild(placeRow(p5.label, p5.aId, p5.bId, p5.key, "placementScores", false));
+  }
+
+  function winnerFrom(bucket, key, aId, bId){
+    const s = state[bucket]?.[key];
+    if(!s || s.a === null || s.b === null) return null;
+    if(s.a > s.b) return aId;
+    if(s.b > s.a) return bId;
+    return null; // tie
+  }
+
+  function finalRow(label, aId, bId, key, bucket, toTisch1, note){
+    const tr = document.createElement("tr");
+    const emptyCols = `
+      <td></td><td></td>
+    `;
+    const matchHtml = `<div class="match"><span class="team"><b>${teamName(aId)}</b></span><span class="vs">vs</span><span class="team"><b>${teamName(bId)}</b></span></div>
+      ${note ? `<div class="small">${note}</div>` : ""}`;
+
+    tr.innerHTML = `
+      <td>${label}</td>
+      ${toTisch1 ? `<td>${matchHtml}</td><td class="right"></td>` : `<td></td><td class="right"></td>`}
+      ${!toTisch1 ? `<td>${matchHtml}</td><td class="right"></td>` : `<td></td><td class="right"></td>`}
+    `;
+
+    // inject score inputs into correct result cell
+    const resultCells = tr.querySelectorAll("td.right");
+    const resCell = toTisch1 ? resultCells[0] : resultCells[1];
+    resCell.appendChild(scoreInputs(key, aId, bId, bucket));
+
+    return tr;
+  }
+
+  function placeRow(label, aId, bId, key, bucket, toTisch1){
+    const tr = document.createElement("tr");
+    const matchHtml = `<div class="match"><span class="team"><b>${teamName(aId)}</b></span><span class="vs">vs</span><span class="team"><b>${teamName(bId)}</b></span></div>`;
+    tr.innerHTML = `
+      <td>${label}</td>
+      ${toTisch1 ? `<td>${matchHtml}</td><td class="right"></td>` : `<td></td><td class="right"></td>`}
+      ${!toTisch1 ? `<td>${matchHtml}</td><td class="right"></td>` : `<td></td><td class="right"></td>`}
+    `;
+    const resultCells = tr.querySelectorAll("td.right");
+    const resCell = toTisch1 ? resultCells[0] : resultCells[1];
+    resCell.appendChild(scoreInputs(key, aId, bId, bucket));
+    return tr;
+  }
+
+  function recomputeAll(){
+    renderGroupMatches();
+    const rankingA = renderTable("A");
+    const rankingB = renderTable("B");
+    renderFinalsAndPlacements(rankingA, rankingB);
+  }
+
+  function bindTeamInputs(){
+    for(const id of TEAM_IDS){
+      const input = el(`team${id}`);
+      input.value = state.teams[id] ?? `Team ${id}`;
+      input.addEventListener("input", () => {
+        state.teams[id] = input.value.trim() || `Team ${id}`;
+        save();
+        recomputeAll();
+      });
+    }
+  }
+
+  function bindReset(){
+    el("btnReset").addEventListener("click", () => {
+      if(!confirm("Wirklich alles löschen (Teamnamen & alle Ergebnisse)?")) return;
+      localStorage.removeItem(LS_KEY);
+      // reload default
+      state.teams = Object.fromEntries(TEAM_IDS.map(i => [i, `Team ${i}`]));
+      state.groupScores = {};
+      state.finalsScores = {};
+      state.placementScores = {};
+      bindTeamInputs();
+      recomputeAll();
+      save();
+    });
+  }
+
+  // ---------- Init ----------
+  load();
+  bindTeamInputs();
+  bindReset();
+
+  // ensure buckets exist
+  state.groupScores = state.groupScores || {};
+  state.finalsScores = state.finalsScores || {};
+  state.placementScores = state.placementScores || {};
+
+  recomputeAll();
+  save();
+})();
+</script>
+</body>
+</html>
